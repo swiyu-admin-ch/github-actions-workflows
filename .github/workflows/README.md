@@ -15,6 +15,11 @@ This repo features the following workflows:
 | OSV-Scanner              | [`osv-scanner.yml`](rust-osv-scanner.yml)       | [workflow_call](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_call) | Run OSV (vulnerabilities) scanner                                                                                                    |           :white_check_mark:            |
 | Build and test Rust code | [`build-and-test.yml`](rust-build-and-test.yml) | [workflow_call](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_call) | Compile a local package and all of its dependencies and execute all unit and integration tests and build examples of a local package |                   :x:                   |
 
+## Workflow sequences
+
+### `rust-clippy.yml`
+
+![](rust-clippy.png)
 
 ## (Re)usage examples
 
@@ -39,32 +44,4 @@ permissions:
 jobs:
   rust-clippy:
     uses: swiyu-admin-ch/github-actions-workflows/.github/workflows/rust-clippy.yml@main
-```
-
-```mermaid
-zenuml
-    title Rust Clippy Workflow
-    
-    @Actor Dev
-    @GitHub GitHub
-    @Kubernetes "rust-toolchain@linux"
-    @LogicApps CodeQL
-    
-    // 1. By running:<br> `git comit -am ... && git push`
-    Dev->GitHub."push local commits to remote" {
-        // 2. ⚠️ **Only in case any of `**/*rs` changed**
-        GitHub->"rust-toolchain@linux"."run Clippy" {
-            // 3. (previously converted from<br> the _Clippy_ output)
-            "rust-toolchain@linux"->CodeQL."upload SARIF file" {
-                CodeQL:"scan the SARIF file against vulnerabilities"
-                opt {
-                    // 3. Create alert(s)<br> (browsable via _Security -> Code scanning_)<br> based on the vulnerabilities report
-                    CodeQL->GitHub:"raise alerts"   
-                        // 4. ⚠️ **Only if _Watch "Securiy alerts"_ option activated:**<br> Send an email notification<br> featuring a detailed report<br> on all new security issues
-                        GitHub->Dev:notify
-                    }
-                }
-            }
-        }
-    }
 ```
