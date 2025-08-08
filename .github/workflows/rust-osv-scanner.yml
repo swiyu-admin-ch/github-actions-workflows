@@ -4,7 +4,7 @@
 # documentation.
 
 # A workflow which sets up OSV-Scanner scanning for vulnerabilities.
-name: OSV-Scanner
+name: OSV-Scanner for Rust
 
 on:
   workflow_call:

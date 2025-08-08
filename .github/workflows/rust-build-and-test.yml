@@ -11,6 +11,10 @@ on:
 permissions:
   # to fetch code (actions/checkout)
   contents: read
+  # https://github.com/marketplace/actions/publish-test-results#permissions
+  # https://github.com/marketplace/actions/junit-report-action
+  checks: write
+  pull-requests: write # only required if `comment: true` was enabled
 
 jobs:
   build-and-test:
@@ -27,9 +31,11 @@ jobs:
         # https://github.com/marketplace/actions/rust-toolchain
         uses: actions-rs/toolchain@v1
         with:
+          # https://rust-lang.github.io/rustup/concepts/profiles.html
           profile: minimal
           toolchain: stable
-          #components: clippy
+          # https://rust-lang.github.io/rustup/concepts/components.html
+          #components: ...
           override: true
 
       - name: Cache
@@ -47,6 +53,30 @@ jobs:
         continue-on-error: false
 
       - name: Run tests in "${{ matrix.BUILD_TARGET }}" mode
-        run: cargo test --profile ${{ matrix.BUILD_TARGET }}
-        continue-on-error: false
+        # as suggested by https://github.com/johnterickson/cargo2junit
+        run: |
+          cargo install cargo2junit
+          cargo test --profile ${{ matrix.BUILD_TARGET }} -- -Z unstable-options --format json --report-time | tee test-results-${{ matrix.BUILD_TARGET }}.json
+          cat test-results-${{ matrix.BUILD_TARGET }}.json | cargo2junit > test-results-${{ matrix.BUILD_TARGET }}.xml
+        env: # See https://github.com/johnterickson/cargo2junit/issues/79
+          RUSTC_BOOTSTRAP: 1
+        #continue-on-error: false
 
+      - name: Publish Test Report for "${{ matrix.BUILD_TARGET }}" mode
+        #https://github.com/marketplace/actions/junit-report-action
+        uses: mikepenz/action-junit-report@v3
+        if: success() || failure() # always run even if the previous step fails
+        with:
+          report_paths: test-results-${{ matrix.BUILD_TARGET }}.xml
+          detailed_summary: true
+          include_passed: true
+          check_name: Test Report
+          #annotate_notice: true
+          #check_title_template: ${{ matrix.BUILD_TARGET }}
+
+      #- name: Publish Test Report for "${{ matrix.BUILD_TARGET }}" mode
+      #  # https://github.com/marketplace/actions/publish-test-results
+      #  uses: EnricoMi/publish-unit-test-result-action@v2
+      #  if: (!cancelled())
+      #  with:
+      #    files: test-results-${{ matrix.BUILD_TARGET }}.xml

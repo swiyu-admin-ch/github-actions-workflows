@@ -3,7 +3,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Execute all benchmarks of a local package
+name: Execute Rust benchmarks
 
 on:
   workflow_call:
@@ -68,3 +68,6 @@ jobs:
         with:
           name: ${{ inputs.report-filename-base }}-${{ matrix.BUILD_TARGET }}.zip
           path: target/criterion
+          retention-days: 0
+          # 9: Best compression Higher levels will result in better compression, but will take longer to complete
+          compression-level: 9
