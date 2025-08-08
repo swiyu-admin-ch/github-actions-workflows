@@ -3,18 +3,29 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Build and test
+name: Execute all benchmarks of a local package
 
 on:
   workflow_call:
+    inputs:
+      quiet:
+        description: "Whether to print cargo log messages (while running 'cargo bench ...' command)"
+        type: boolean
+        required: false
+        default: false
+      report-filename-base:
+        description: "The prefix to use for report bundle"
+        type: string
+        required: false
+        default: benchmarks-report
 
 permissions:
   # to fetch code (actions/checkout)
   contents: read
 
 jobs:
-  build-and-test:
-    name: Build and test
+  rust-benchmarks:
+    name: Execute all benchmarks of a local package
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -42,11 +53,18 @@ jobs:
           #key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.toml') }}
 
-      - name: Build binaries in "${{ matrix.BUILD_TARGET }}" mode
-        run: cargo build --profile ${{ matrix.BUILD_TARGET }}
+      - name: Execute benchmarks (quietly)
+        if: ${{ inputs.quiet == true }}
+        run: cargo bench --profile ${{ matrix.BUILD_TARGET }} --quiet #--message-format human
         continue-on-error: false
 
-      - name: Run tests in "${{ matrix.BUILD_TARGET }}" mode
-        run: cargo test --profile ${{ matrix.BUILD_TARGET }}
+      - name: Execute benchmarks
+        if: ${{ inputs.quiet != true }}
+        run: cargo bench --profile ${{ matrix.BUILD_TARGET }} #--message-format human
         continue-on-error: false
 
+      - name: Save report
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.report-filename-base }}-${{ matrix.BUILD_TARGET }}.zip
+          path: target/criterion

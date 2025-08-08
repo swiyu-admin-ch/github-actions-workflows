@@ -16,7 +16,7 @@ zenuml
                 opt {
                     // 3. Create alert(s)<br> (browsable via _Security -> Code scanning_)<br> based on the vulnerabilities report
                     CodeQL->GitHub:"raise alerts"
-                        // 4. ⚠️ **Only if _Watch "Securiy alerts"_ option activated:**<br> Send an email notification<br> featuring a detailed report<br> on all new security issues
+                        // 4. ⚠️ **Only if _Watch "Security alerts"_ option activated:**<br> Send an email notification<br> featuring a detailed report<br> on all new security issues
                         GitHub->Dev:notify
                     }
                 }
