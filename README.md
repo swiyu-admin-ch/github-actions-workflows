@@ -1,7 +1,7 @@
 # github-actions-workflows
 
 This repo features various [**reusable**](https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows)
-(i.t. to be called by another workflow) GitHub Actions workflows intended to be used by other code (Rust/Java) repos 
+(i.e. to be called by another workflow) GitHub Actions workflows intended to be used by other code (Rust/Java) repos 
 in this GitHub organization.
 
 The following [workflow_call](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_call) workflows are available out-of-the-box:
@@ -98,7 +98,7 @@ sequenceDiagram
     rust   ->>- rust: Execute all unit and integration tests<br> and build examples of a local package
 
     alt success
-        rust ->> gh: Produce test report<br> with summary and annotations
+        rust ->> gh: Produce test report<br> (within run summary)
     else errors occurred
         rust ->> gh: Break the workflow execution
         gh   ->>- dev: notify user<br>per e-mail
@@ -131,6 +131,8 @@ sequenceDiagram
 ```
 
 ## (Re)usage examples
+
+Here are just a few indicative usage examples as seen in other code (Rust/Java) repos in this GitHub organization.
 
 ### Reusing [`rust-clippy.yml`](.github/workflows/rust-clippy.yml)
 

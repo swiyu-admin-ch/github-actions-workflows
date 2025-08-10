@@ -7,6 +7,17 @@ name: Build and test
 
 on:
   workflow_call:
+    inputs:
+      debug:
+        description: "Whether to build artifacts for normal development and debugging (default: true)"
+        type: boolean
+        required: false
+        default: true
+      release:
+        description: "Whether to also build artifacts in release mode, with optimizations"
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   # to fetch code (actions/checkout)
@@ -22,7 +33,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        BUILD_TARGET: [ release ] # refers to a cargo profile
+        # https://doc.rust-lang.org/cargo/reference/profiles.html:
+        # Cargo has 4 built-in profiles: dev, release, test, and bench
+        BUILD_TARGET: [ dev, release ] # refers to a cargo profile
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -53,6 +66,9 @@ jobs:
         continue-on-error: false
 
       - name: Run tests in "${{ matrix.BUILD_TARGET }}" mode
+        if: |
+          ${{ inputs.debug   == true && matrix.BUILD_TARGET == 'dev' ||
+              inputs.release == true && matrix.BUILD_TARGET == 'release' }}
         # as suggested by https://github.com/johnterickson/cargo2junit
         run: |
           cargo install cargo2junit
