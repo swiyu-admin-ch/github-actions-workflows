@@ -77,23 +77,38 @@ jobs:
           RUSTC_BOOTSTRAP: 1
         #continue-on-error: false
 
-      #- name: Publish test report ("${{ matrix.BUILD_TARGET }}")
+      - name: Upload Test Results
+        if: (!cancelled())
+        uses: actions/upload-artifact@v4
+        with:
+          name: Test Results (${{ matrix.BUILD_TARGET }})
+          path: test-results-${{ matrix.BUILD_TARGET }}.xml
+
+  # as suggested by https://github.com/EnricoMi/publish-unit-test-result-action?tab=readme-ov-file#use-with-matrix-strategy
+  publish-test-results:
+    name: Publish tests results
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: (!cancelled())
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Publish test results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: artifacts/**/test-results-*.xml
+
+      #- name: Publish test report
       #  #https://github.com/marketplace/actions/junit-report-action
       #  uses: mikepenz/action-junit-report@v3
       #  if: success() || failure() # always run even if the previous step fails
       #  with:
-      #    report_paths: test-results-${{ matrix.BUILD_TARGET }}.xml
+      #    report_paths: artifacts/**/test-results-*.xml
       #    detailed_summary: true
       #    include_passed: true
-      #    check_name: Test Report (${{ matrix.BUILD_TARGET }})
+      #    check_name: Test Report
       #    #annotate_notice: true
-      #    #check_title_template: ${{ matrix.BUILD_TARGET }}
-
-      - name: Publish test report ("${{ matrix.BUILD_TARGET }}")
-        # https://github.com/marketplace/actions/publish-test-results
-        uses: EnricoMi/publish-unit-test-result-action@v2
-        if: (!cancelled())
-        with:
-          files: test-results-${{ matrix.BUILD_TARGET }}.xml
-          check_name: Test Results (${{ matrix.BUILD_TARGET }})
-
