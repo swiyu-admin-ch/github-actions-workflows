@@ -62,11 +62,12 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.toml') }}
 
       - name: Build binaries ("${{ matrix.BUILD_TARGET }}")
+        if: ${{ (inputs.debug && (matrix.BUILD_TARGET == 'dev')) || (inputs.release && (matrix.BUILD_TARGET == 'release')) }}
         run: cargo build --profile ${{ matrix.BUILD_TARGET }}
         continue-on-error: false
 
       - name: Run tests ("${{ matrix.BUILD_TARGET }}")
-        if: ${{ (inputs.debug   && (matrix.BUILD_TARGET == 'dev')) || (inputs.release && (matrix.BUILD_TARGET == 'release')) }}
+        if: ${{ (inputs.debug && (matrix.BUILD_TARGET == 'dev')) || (inputs.release && (matrix.BUILD_TARGET == 'release')) }}
         # as suggested by https://github.com/johnterickson/cargo2junit
         run: |
           cargo install cargo2junit
@@ -88,9 +89,11 @@ jobs:
       #    #annotate_notice: true
       #    #check_title_template: ${{ matrix.BUILD_TARGET }}
 
-      - name: Publish Test Report for "${{ matrix.BUILD_TARGET }}" mode
+      - name: Publish test report ("${{ matrix.BUILD_TARGET }}")
         # https://github.com/marketplace/actions/publish-test-results
         uses: EnricoMi/publish-unit-test-result-action@v2
         if: (!cancelled())
         with:
           files: test-results-${{ matrix.BUILD_TARGET }}.xml
+          check_name: Test Results (${{ matrix.BUILD_TARGET }})
+
