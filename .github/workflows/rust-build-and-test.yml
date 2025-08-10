@@ -67,8 +67,8 @@ jobs:
 
       - name: Run tests in "${{ matrix.BUILD_TARGET }}" mode
         if: |
-          ${{ inputs.debug   == true && matrix.BUILD_TARGET == 'dev' ||
-              inputs.release == true && matrix.BUILD_TARGET == 'release' }}
+          ${{ (inputs.debug   == true && matrix.BUILD_TARGET == 'dev') ||
+              (inputs.release == true && matrix.BUILD_TARGET == 'release') }}
         # as suggested by https://github.com/johnterickson/cargo2junit
         run: |
           cargo install cargo2junit
@@ -86,7 +86,7 @@ jobs:
           report_paths: test-results-${{ matrix.BUILD_TARGET }}.xml
           detailed_summary: true
           include_passed: true
-          check_name: Test Report
+          check_name: Test Report (${{ matrix.BUILD_TARGET }})
           #annotate_notice: true
           #check_title_template: ${{ matrix.BUILD_TARGET }}
 
