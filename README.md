@@ -1,17 +1,17 @@
 # github-actions-workflows
 
 This repo features various [**reusable**](https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows)
-(i.e. to be called by another workflow) GitHub Actions workflows intended to be used by other code (Rust/Java) repos 
+(i.e. to be called by another workflow) GitHub Actions workflows intended to be used by other code (Rust/Java) repos
 in this GitHub organization.
 
 The following [workflow_call](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_call) workflows are available out-of-the-box:
 
-| Name                     | YAML                                                                   | Required<br> [permissions](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#permissions) | Description                                                                                                                                                 |               Inputs               | Artifacts <br>(produced during runtime) |
-|--------------------------|------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------:|-------------------------------------------------------------------------------------------------------------------------------------------------------------|:----------------------------------:|:---------------------------------------:|
-| rust-clippy analyze      | [`rust-clippy.yml`](.github/workflows/rust-clippy.yml)                 |                             `actions: read`<br> `security-events: write`<br> `contents: read`                              | Checks Rust package to catch common mistakes and improve the code                                                                                           |                :x:                 |                   :x:                   |
-| OSV-Scanner for Rust     | [`rust-osv-scanner.yml`](.github/workflows/rust-osv-scanner.yml)       |                             `actions: read`<br> `security-events: write`<br> `contents: read`                              | Run OSV (vulnerabilities) scanner                                                                                                                           |                :x:                 |           :white_check_mark:            |
-| Build and test Rust code | [`rust-build-and-test.yml`](.github/workflows/rust-build-and-test.yml) |                                            `contents: read`<br> `checks: write`                                            | Compile a local package and all of its dependencies and execute all unit and integration tests and build examples of a local package. Test report included. |       `debug`<br> `release`        |                   :x:                   |
-| Execute Rust benchmarks  | [`rust-benchmarks.yml`](.github/workflows/rust-benchmarks.yml)         |                                                      `contents: read`                                                      | Execute all benchmarks of a local package                                                                                                                   | `quiet`<br> `report-filename-base` |           :white_check_mark:            |
+| Name                     | YAML                                                                   | Required<br> [permissions](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#permissions) | Description                                                                                                                                                 |                 Inputs                 | Artifacts <br>(produced during runtime) |
+|--------------------------|------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------:|-------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------------------------------------:|:---------------------------------------:|
+| rust-clippy analyze      | [`rust-clippy.yml`](.github/workflows/rust-clippy.yml)                 |                         `actions: read`<br><br> `security-events: write`<br><br> `contents: read`                          | Checks Rust package to catch common mistakes and improve the code                                                                                           |                  :x:                   |                   :x:                   |
+| OSV-Scanner for Rust     | [`rust-osv-scanner.yml`](.github/workflows/rust-osv-scanner.yml)       |                         `actions: read`<br><br> `security-events: write`<br><br> `contents: read`                          | Run OSV (vulnerabilities) scanner                                                                                                                           |                  :x:                   |           :white_check_mark:            |
+| Build and test Rust code | [`rust-build-and-test.yml`](.github/workflows/rust-build-and-test.yml) |                                          `contents: read`<br><br> `checks: write`                                          | Compile a local package and all of its dependencies and execute all unit and integration tests and build examples of a local package. Test report included. |       `debug`<br><br> `release`        |                   :x:                   |
+| Execute Rust benchmarks  | [`rust-benchmarks.yml`](.github/workflows/rust-benchmarks.yml)         |                                                      `contents: read`                                                      | Execute all benchmarks of a local package                                                                                                                   | `quiet`<br><br> `report-filename-base` |           :white_check_mark:            |
 
 ## Workflows
 
@@ -30,8 +30,7 @@ sequenceDiagram
     participant rust   as rust-toolchain@linux
     participant CodeQL as CodeQL
 
-    %%Note over dev,CodeQL: The user must be logged in
-    Note right of dev: A logged in GitHub user<br> with sufficient access rights
+    Note over dev: A logged in GitHub user<br> with sufficient access rights
     Note over rust: Ubuntu Container
     Note over CodeQL: ⚠️ MUST be activated in<br> Settings -> Advanced Security -> Code scanning
 
@@ -59,8 +58,7 @@ sequenceDiagram
     participant osv    as OSV<br> (vulnerabilities)<br> scanner
     participant CodeQL as CodeQL
 
-    %%Note over dev,CodeQL: The user must be logged in
-    Note right of dev: A logged in GitHub user<br> with sufficient access rights
+    Note over dev: A logged in GitHub user<br> with sufficient access rights
     Note over rust: Ubuntu Container
     Note over osv: reusable workflow job
     Note over CodeQL: ⚠️ MUST be activated in<br> Settings -> Advanced Security -> Code scanning
@@ -89,18 +87,20 @@ sequenceDiagram
     participant gh as GitHub
     participant rust   as rust-toolchain@linux
 
-    %%Note over dev,CodeQL: The user must be logged in
-    Note right of dev: A logged in GitHub user<br> with sufficient access rights
+    Note over dev: A logged in GitHub user<br> with sufficient access rights
     Note over rust,rust: Ubuntu Container
 
     dev    ->>+ gh: push local commits to remote<br>(git commit -am ... && git push)
-    gh     ->>+ rust: Compile a local (Rust) package<br> and all of its dependencies
-    rust   ->>- rust: Execute all unit and integration tests<br> and build examples of a local package
+
+    loop for each (activated) profile
+        gh     ->>+ rust: Compile a local (Rust) package<br> and all of its dependencies
+        rust   ->> rust: Execute all unit and integration tests<br> and build examples of a local package
+    end
 
     alt success
         rust ->> gh: Produce test report<br> (within run summary)
     else errors occurred
-        rust ->> gh: Break the workflow execution
+        rust ->>- gh: Break the workflow execution
         gh   ->>- dev: notify user<br>per e-mail
     end
 ```
@@ -115,17 +115,16 @@ sequenceDiagram
     participant gh as GitHub
     participant rust   as rust-toolchain@linux
 
-    %%Note over dev,CodeQL: The user must be logged in
-    Note right of dev: A logged in GitHub user<br> with sufficient access rights
+    Note over dev: A logged in GitHub user<br> with sufficient access rights
     Note over rust,rust: Ubuntu Container
 
     dev    ->>+ gh: create and push new tag<br>(git tag <NEW_TAG> && git push --tag)
-    gh     ->> rust: Execute all benchmarks of a local package
+    gh     ->>+ rust: Execute all benchmarks of a local package
 
     alt success
         rust ->> gh: Save the benchmarks report<br> as a workflow run artifact with default retention
     else errors occurred
-        rust ->> gh: Break the workflow execution
+        rust ->>- gh: Break the workflow execution
         gh   ->>- dev: notify user<br>per e-mail
     end
 ```
@@ -186,7 +185,7 @@ jobs:
 on:
   # On each an every push across all branches
   push:
-    #branches: [ "main" ]
+  #branches: [ "main" ]
 
 permissions:
   # to fetch code (actions/checkout)
@@ -220,9 +219,9 @@ permissions:
 jobs:
   rust-benchmarks:
     uses: swiyu-admin-ch/github-actions-workflows/.github/workflows/rust-benchmarks.yml@main
-    #with:
+      #with:
       # Whether to print cargo log messages (while running 'cargo bench ...' command)
       #quiet: true
       # The prefix to use for report bundle
-      #report-filename-base: benchmarks-report
+    #report-filename-base: benchmarks-report
 ```
