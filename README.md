@@ -26,7 +26,7 @@ sequenceDiagram
     autonumber
 
     actor dev as Developer
-    participant gh as GitHub
+    participant gh     as GitHub
     participant rust   as rust-toolchain@linux
     participant CodeQL as CodeQL
 
@@ -41,8 +41,8 @@ sequenceDiagram
     CodeQL ->>  CodeQL: scan the SARIF file<br> against vulnerabilities
 
     alt Vunerabilities detected
-        CodeQL ->>- gh: raise alerts based on the vulnerabilities report<br> (browsable via Security -> Code scanning)
-        gh     ->> dev: notify user<br> ⚠️ Only if Watch "Security alerts" option activated:<br> Send an email notification<br> featuring a detailed report<br> on all new security issues
+        CodeQL -->>- gh: raise alerts based on the vulnerabilities report<br> (browsable via Security -> Code scanning)
+        gh     -->>  dev: notify user<br> ⚠️ Only if Watch "Security alerts" option activated:<br> Send an email notification<br> featuring a detailed report<br> on all new security issues
     end
 ```
 
@@ -66,14 +66,14 @@ sequenceDiagram
     dev    ->>+ gh: push local commits to remote<br>(git commit -am ... && git push)
     gh     ->>+ rust: create SBOM file from Cargo.toml<br>⚠️ Only in case any of **/Cargo.toml file(s) changed
     rust   ->>- gh: upload the SBOM file
-    osv    ->>+ gh: download the SBOM file
+    osv    ->>  gh: download the SBOM file
     osv    ->>+ osv: Scan against<br> vulnerabilities DB
     osv    ->>+ CodeQL: upload the SARIF file
     CodeQL ->>  CodeQL: scan the SARIF file<br> against vulnerabilities
 
     alt Vunerabilities detected
-        CodeQL ->>- gh: raise alerts based on the vulnerabilities report<br> (browsable via Security -> Code scanning)
-        gh     ->>- dev: notify user<br> ⚠️ Only if Watch "Security alerts" option activated:<br> Send an email notification<br> featuring a detailed report<br> on all new security issues
+        CodeQL -->>- gh: raise alerts based on the vulnerabilities report<br> (browsable via Security -> Code scanning)
+        gh     -->>- dev: notify user<br> ⚠️ Only if Watch "Security alerts" option activated:<br> Send an email notification<br> featuring a detailed report<br> on all new security issues
     end
 ```
 
@@ -84,24 +84,24 @@ sequenceDiagram
     autonumber
 
     actor dev as Developer
-    participant gh as GitHub
-    participant rust   as rust-toolchain@linux
+    participant gh   as GitHub
+    participant rust as rust-toolchain@linux
 
     Note over dev: A logged in GitHub user<br> with sufficient access rights
     Note over rust,rust: Ubuntu Container
 
-    dev    ->>+ gh: push local commits to remote<br>(git commit -am ... && git push)
+    dev ->>+ gh: push local commits to remote<br>(git commit -am ... && git push)
 
     loop for each (activated) profile
-        gh     ->>+ rust: Compile a local (Rust) package<br> and all of its dependencies
-        rust   ->> rust: Execute all unit and integration tests<br> and build examples of a local package
+        gh   ->>- rust: Compile a local (Rust) package<br> and all of its dependencies
+        rust ->>+ rust: Execute all unit and integration tests<br> and build examples of a local package
     end
 
     alt success
-        rust ->> gh: Produce test report<br> (within run summary)
+        rust -->>- gh: Produce test report<br> (within run summary)
     else errors occurred
-        rust ->>- gh: Break the workflow execution
-        gh   ->>- dev: notify user<br>per e-mail
+        rust -->>+ gh: Break the workflow execution
+        gh   -->>- dev: notify user<br>per e-mail
     end
 ```
 
@@ -112,8 +112,8 @@ sequenceDiagram
     autonumber
 
     actor dev as Developer
-    participant gh as GitHub
-    participant rust   as rust-toolchain@linux
+    participant gh   as GitHub
+    participant rust as rust-toolchain@linux
 
     Note over dev: A logged in GitHub user<br> with sufficient access rights
     Note over rust,rust: Ubuntu Container
@@ -122,10 +122,10 @@ sequenceDiagram
     gh     ->>+ rust: Execute all benchmarks of a local package
 
     alt success
-        rust ->> gh: Save the benchmarks report<br> as a workflow run artifact with default retention
+        rust -->>  gh: Save the benchmarks report<br> as a workflow run artifact with default retention
     else errors occurred
-        rust ->>- gh: Break the workflow execution
-        gh   ->>- dev: notify user<br>per e-mail
+        rust -->>- gh: Break the workflow execution
+        gh   -->>- dev: notify user<br>per e-mail
     end
 ```
 
