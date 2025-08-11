@@ -199,6 +199,11 @@ permissions:
 jobs:
   rust-build-and-test:
     uses: swiyu-admin-ch/github-actions-workflows/.github/workflows/rust-build-and-test.yml@main
+    #with:
+      # Whether to build artifacts for normal development and debugging (default: true)
+      #debug: true
+      # Whether to also build artifacts in release mode, with optimizations
+      #release: false
 ```
 
 ### Reusing [`rust-benchmarks.yml`](.github/workflows/rust-benchmarks.yml)
@@ -219,9 +224,9 @@ permissions:
 jobs:
   rust-benchmarks:
     uses: swiyu-admin-ch/github-actions-workflows/.github/workflows/rust-benchmarks.yml@main
-      #with:
+    #with:
       # Whether to print cargo log messages (while running 'cargo bench ...' command)
       #quiet: true
       # The prefix to use for report bundle
-    #report-filename-base: benchmarks-report
+      #report-filename-base: benchmarks-report
 ```
