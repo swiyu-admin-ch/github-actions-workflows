@@ -78,13 +78,13 @@ jobs:
           path: test-results-release.xml
           retention-days: 1 # minimum
 
-  codeql-analysis:
-    name: CodeQL Analysis
-    needs: rust-code-quality-check
-    runs-on: ubuntu-latest
-    if: (!cancelled())
+  #codeql-analysis:
+  #  name: CodeQL Analysis
+  #  needs: rust-code-quality-check
+  #  runs-on: ubuntu-latest
+  #  if: (!cancelled())
 
-    steps:
+  #  steps:
       # CAUTION The CodeQL action MUST follow the compilation step
       # See https://github.com/github/codeql-action
       - name: Initialize CodeQL
@@ -124,6 +124,11 @@ jobs:
       - name: Perform CodeQL Analysis
         # Finalizes the CodeQL database, runs the analysis, and uploads the results to Code Scanning.
         # For information about input parameters, see https://github.com/github/codeql-action/blob/main/analyze/action.yml
+        #
+        # Beware of https://gh.io/troubleshooting-code-scanning/no-source-code-seen-during-build:
+        # Compilation outside init and analyze steps: Your workflow builds a compiled language (C, C++, C#, Go, or Java),
+        # but compilation does not occur between the init and analyze steps in the workflow.
+        # CodeQL requires that your build happens in between these two steps in order to observe the activity of the compiler and perform analysis.
         uses: github/codeql-action/analyze@v3
         with:
           # String used by Code Scanning for matching the analyses
