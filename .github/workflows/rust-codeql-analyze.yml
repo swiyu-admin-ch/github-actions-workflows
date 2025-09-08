@@ -1,0 +1,78 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: CodeQL Analysis for Rust
+
+on:
+  workflow_call:
+
+permissions:
+  # Required to upload SARIF file to CodeQL. See: https://github.com/github/codeql-action/issues/2117
+  actions: read
+  # Require writing security events to upload SARIF file to security tab
+  # As described at https://github.com/github/codeql-action?tab=readme-ov-file#workflow-permissions
+  security-events: write
+  # to fetch code (actions/checkout)
+  contents: read
+
+jobs:
+  rust-codeql-analyze:
+    name: Analyze Rust code (CodeQL)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # See https://github.com/github/codeql-action
+      - name: Initialize CodeQL
+        # Sets up CodeQL for analysis.
+        # For information about input parameters, see https://github.com/github/codeql-action/blob/main/init/action.yml
+        uses: github/codeql-action/init@v3
+        with:
+          # Provided by the current versions of the CodeQL query pack codeql/rust-queries and the CodeQL library pack codeql/rust-all
+          # See https://codeql.github.com/docs/codeql-overview/supported-languages-and-frameworks/#rust-built-in-support
+          languages: rust
+          # CAUTION Using config-file (Path of the config file to use) from here would always cause "file not found" error.
+          # See https://github.com/github/codeql/tree/codeql-cli/latest/rust/ql/src/codeql-suites
+          config: |-
+            queries:
+              # Queries from "default", "security-extended", plus extra maintainability and reliability queries
+              - name: rust-security-and-quality
+                uses: rust-security-and-quality
+            
+            # Additional queries for extended security analysis
+            query-filters:
+              - include:
+                  kind: problem
+              - include:
+                  kind: path-problem
+              - include:
+                  severity: ["error", "warning"]  # Only errors and warnings
+            #  - exclude:
+            #      tags: ["external/cwe/cwe-798"] # Exclude specific CWEs
+            
+            # Extended analysis options
+            disable-default-queries: false
+            
+            # manual - you define the build steps to use for the codebase in the workflow (supported for all compiled languages, except Rust).
+            # none   - The database will be created without building the source code. Available for all interpreted languages and some compiled languages.
+            #build-mode: ???
+
+      - name: Perform CodeQL Analysis
+        # Finalizes the CodeQL database, runs the analysis, and uploads the results to Code Scanning.
+        # For information about input parameters, see https://github.com/github/codeql-action/blob/main/analyze/action.yml
+        #
+        # Beware of https://gh.io/troubleshooting-code-scanning/no-source-code-seen-during-build:
+        # Compilation outside init and analyze steps: Your workflow builds a compiled language (C, C++, C#, Go, or Java),
+        # but compilation does not occur between the init and analyze steps in the workflow.
+        # CodeQL requires that your build happens in between these two steps in order to observe the activity of the compiler and perform analysis.
+        uses: github/codeql-action/analyze@v3
+        with:
+          # String used by Code Scanning for matching the analyses
+          #
+          # Optional. Specify a category to distinguish between multiple analyses
+          # for the same tool and ref. If you don't use `category` in your workflow,
+          # GitHub will generate a default category name for you
+          category: "/language:rust"
