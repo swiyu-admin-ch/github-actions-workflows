@@ -93,7 +93,29 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: rust
-          config-file: ../.github/codeql/rust-codeql-config.yml
+          #config-file: .github/codeql/rust-codeql-config.yml
+          config: |-
+            queries:
+              - name: rust-security-extended
+                uses: rust-security-extended
+              - name: rust-security-and-quality
+                uses: rust-security-and-quality
+            
+            # Additional queries for extended security analysis
+            query-filters:
+              - include:
+                  kind: problem
+              - include:
+                  kind: path-problem
+              - include:
+                  severity: ["error", "warning"]  # Only errors and warnings
+            #  - exclude:
+            #      tags: ["external/cwe/cwe-798"] # Exclude specific CWEs
+            
+            # Extended analysis options
+            disable-default-queries: false
+            
+            build-mode: manual
 
       - name: Perform CodeQL Analysis
         # Finalizes the CodeQL database, runs the analysis, and uploads the results to Code Scanning.
