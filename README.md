@@ -12,6 +12,7 @@ The following [workflow_call](https://docs.github.com/en/actions/reference/workf
 | OSV-Scanner for Rust     | [`rust-osv-scanner.yml`](.github/workflows/rust-osv-scanner.yml)       |                         `actions: read`<br><br> `security-events: write`<br><br> `contents: read`                          | Run OSV (vulnerabilities) scanner                                                                                                                           |                  :x:                   |           :white_check_mark:            |
 | Build and test Rust code | [`rust-build-and-test.yml`](.github/workflows/rust-build-and-test.yml) |                                          `contents: read`<br><br> `checks: write`                                          | Compile a local package and all of its dependencies and execute all unit and integration tests and build examples of a local package. Test report included. |       `debug`<br><br> `release`        |                   :x:                   |
 | Execute Rust benchmarks  | [`rust-benchmarks.yml`](.github/workflows/rust-benchmarks.yml)         |                                                      `contents: read`                                                      | Execute all benchmarks of a local package                                                                                                                   | `quiet`<br><br> `report-filename-base` |           :white_check_mark:            |
+| CodeQL Analysis for Rust | [`rust-codeql-analyze.yml`](.github/workflows/rust-codeql-analyze.yml) |                         `actions: read`<br><br> `security-events: write`<br><br> `contents: read`                          | [Extended Security CodeQL Analysis for Rust](https://codeql.github.com/docs/codeql-overview/supported-languages-and-frameworks/#rust-built-in-support)      |                  :x:                   |           :white_check_mark:            |
 
 ## Workflows
 
@@ -129,6 +130,10 @@ sequenceDiagram
     end
 ```
 
+### Typical [`rust-codeql-analyze.yml`](.github/workflows/rust-codeql-analyze.yml) sequence
+
+:x: **COMMING SOON**
+
 ## (Re)usage examples
 
 Here are just a few indicative usage examples as seen in other code (Rust/Java) repos in this GitHub organization.
@@ -229,4 +234,32 @@ jobs:
       #quiet: true
       # The prefix to use for report bundle
       #report-filename-base: benchmarks-report
+```
+
+
+### Reusing [`rust-codeql-analyze.yml`](.github/workflows/rust-codeql-analyze.yml)
+
+```yaml
+on:
+  pull_request:
+    #branches: [main]
+
+permissions:
+  # to fetch code (actions/checkout)
+  contents: read
+  # as explained by:
+  # - https://github.com/marketplace/actions/publish-test-results#permissions
+  # - https://github.com/marketplace/actions/junit-report-action
+  checks: write
+  pull-requests: write # only required if `comment: true` was enabled
+  
+  # Required to upload SARIF file to CodeQL. See: https://github.com/github/codeql-action/issues/2117
+  actions: read
+  # Require writing security events to upload SARIF file to security tab
+  # As described at https://github.com/github/codeql-action?tab=readme-ov-file#workflow-permissions
+  security-events: write
+
+jobs:
+  rust-codeql-analyze:
+    uses: swiyu-admin-ch/github-actions-workflows/.github/workflows/rust-codeql-analyze.yml@main
 ```
