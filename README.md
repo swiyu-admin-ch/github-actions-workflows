@@ -147,6 +147,10 @@ on:
     # speed up the CI pipeline, since the linting process will not be performed if no source code files were changed.
     paths:
       - '**/*.rs'
+  pull_request:
+    branches: [ "main" ]
+  merge_group:
+    branches: [ "main" ]
 
 permissions:
   # Required to upload SARIF file to CodeQL. See: https://github.com/github/codeql-action/issues/2117
@@ -170,6 +174,10 @@ on:
     # speed up the CI pipeline, since the audit process will not be performed if no dependencies were changed.
     paths:
       - '**/Cargo.toml'
+  pull_request:
+    branches: [ "main" ]
+  merge_group:
+    branches: [ "main" ]
 
 permissions:
   # Required to upload SARIF file to CodeQL. See: https://github.com/github/codeql-action/issues/2117
@@ -241,8 +249,15 @@ jobs:
 
 ```yaml
 on:
+  push:
+    #branches: [ "main" ]
+    # speed up the CI pipeline, since the linting process will not be performed if no source code files were changed.
+    paths:
+      - '**/*.rs'
   pull_request:
-    #branches: [main]
+    branches: [ "main" ]
+  merge_group:
+    branches: [ "main" ]
 
 permissions:
   # to fetch code (actions/checkout)
