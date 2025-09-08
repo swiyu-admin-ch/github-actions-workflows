@@ -108,7 +108,8 @@ jobs:
     name: Publish tests results
     needs: rust-code-quality-check
     runs-on: ubuntu-latest
-    if: (!cancelled())
+    if: false #REMOVEME
+    #if: (!cancelled())
 
     steps:
       - name: Download artifacts
