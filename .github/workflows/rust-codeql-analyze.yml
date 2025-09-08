@@ -27,6 +27,7 @@ permissions:
 
 jobs:
   rust-codeql-analyze:
+    name: Analysis Rust code (CodeQL)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
