@@ -93,7 +93,7 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: rust
-          config-file: ./.github/codeql/rust-codeql-config.yml
+          config-file: ../.github/codeql/rust-codeql-config.yml
 
       - name: Perform CodeQL Analysis
         # Finalizes the CodeQL database, runs the analysis, and uploads the results to Code Scanning.
