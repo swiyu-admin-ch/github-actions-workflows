@@ -21,26 +21,18 @@ permissions:
   # to fetch code (actions/checkout)
   contents: read
   # ???
-  packages: write
-  attestations: write
-  id-token: write
+  #packages: write
+  #attestations: write
+  #id-token: write
 
 jobs:
   rust-codeql-analyze:
-    name: Analysis Rust code (CodeQL)
+    name: Analyze Rust code (CodeQL)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-  #codeql-analysis:
-  #  name: CodeQL Analysis
-  #  needs: rust-code-quality-check
-  #  runs-on: ubuntu-latest
-  #  if: (!cancelled())
-
-  #  steps:
-      # CAUTION The CodeQL action MUST follow the compilation step
       # See https://github.com/github/codeql-action
       - name: Initialize CodeQL
         # Sets up CodeQL for analysis.
@@ -48,7 +40,7 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: rust
-          #config-file: .github/codeql/rust-codeql-config.yml
+          # CAUTION Using config-file (Path of the config file to use) from here would always cause "file not found" error.
           # See https://github.com/github/codeql/tree/codeql-cli/latest/rust/ql/src/codeql-suites
           config: |-
             queries:
@@ -71,9 +63,8 @@ jobs:
             disable-default-queries: false
             
             # manual - you define the build steps to use for the codebase in the workflow (supported for all compiled languages, except Rust).
-            # none - The database will be created without building the source code.
-            # Available for all interpreted languages and some compiled languages.
-            #build-mode: none
+            # none   - The database will be created without building the source code. Available for all interpreted languages and some compiled languages.
+            #build-mode: ???
 
       - name: Perform CodeQL Analysis
         # Finalizes the CodeQL database, runs the analysis, and uploads the results to Code Scanning.
