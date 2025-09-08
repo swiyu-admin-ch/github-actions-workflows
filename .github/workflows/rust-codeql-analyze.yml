@@ -7,9 +7,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Pull Request Check for Rust
-
-run-name: ${{ github.repository }} is evaluating pull request
+name: CodeQL Analysis for Rust
 
 on:
   workflow_call:
@@ -83,7 +81,7 @@ jobs:
             # manual - you define the build steps to use for the codebase in the workflow (supported for all compiled languages, except Rust).
             # none - The database will be created without building the source code.
             # Available for all interpreted languages and some compiled languages.
-            build-mode: none
+            #build-mode: none
 
       - name: Perform CodeQL Analysis
         # Finalizes the CodeQL database, runs the analysis, and uploads the results to Code Scanning.
