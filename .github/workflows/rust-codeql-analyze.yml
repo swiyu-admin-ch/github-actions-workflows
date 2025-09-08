@@ -32,15 +32,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install the Rust toolchain
-        # https://github.com/marketplace/actions/rust-toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          #components: clippy
-          override: true
-
   #codeql-analysis:
   #  name: CodeQL Analysis
   #  needs: rust-code-quality-check
