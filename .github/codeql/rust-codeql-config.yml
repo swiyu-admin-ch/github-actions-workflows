@@ -5,8 +5,7 @@
 name: "Advanced CodeQL Configuration for Rust"
 
 queries:
-  - name: rust-security-extended
-    uses: rust-security-extended
+  #  queries from default, security-extended, plus extra maintainability and reliability queries
   - name: rust-security-and-quality
     uses: rust-security-and-quality
 
