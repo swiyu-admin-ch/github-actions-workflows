@@ -35,6 +35,8 @@ jobs:
         # For information about input parameters, see https://github.com/github/codeql-action/blob/main/init/action.yml
         uses: github/codeql-action/init@v3
         with:
+          # Provided by the current versions of the CodeQL query pack codeql/rust-queries and the CodeQL library pack codeql/rust-all
+          # See https://codeql.github.com/docs/codeql-overview/supported-languages-and-frameworks/#rust-built-in-support
           languages: rust
           # CAUTION Using config-file (Path of the config file to use) from here would always cause "file not found" error.
           # See https://github.com/github/codeql/tree/codeql-cli/latest/rust/ql/src/codeql-suites
