@@ -35,7 +35,9 @@ jobs:
           override: true
 
       - name: Install required Rust binary (cargo-sbom)
-        run: cargo install cargo-sbom
+        run: |
+          cargo install cargo-sbom
+          cargo-sbom --version
 
       # https://crates.io/crates/cargo-sbom
       - name: Run cargo-sbom
@@ -52,7 +54,7 @@ jobs:
     needs: sbom
     name: OSV (vulnerabilities) scanner
     # see https://google.github.io/osv-scanner/github-action/
-    uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.1.0"
+    uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.2.2"
     with:
       # Download the artifact uploaded in sbom step
       download-artifact: SBOM-file
