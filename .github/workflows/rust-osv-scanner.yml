@@ -20,7 +20,8 @@ permissions:
 jobs:
   sbom:
     name: Create Software Bill Of Material (SBOM) for Rust
-    runs-on: ubuntu-latest
+    #runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
