@@ -6,13 +6,14 @@ in this GitHub organization.
 
 The following [workflow_call](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#workflow_call) workflows are available out-of-the-box:
 
-| Name                     | YAML                                                                   | Required<br> [permissions](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#permissions) | Description                                                                                                                                                 |                 Inputs                 | Artifacts <br>(produced during runtime) |
-|--------------------------|------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------:|-------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------------------------------------:|:---------------------------------------:|
-| rust-clippy analyze      | [`rust-clippy.yml`](.github/workflows/rust-clippy.yml)                 |                         `actions: read`<br><br> `security-events: write`<br><br> `contents: read`                          | Checks Rust package to catch common mistakes and improve the code                                                                                           |                  :x:                   |                   :x:                   |
-| OSV-Scanner for Rust     | [`rust-osv-scanner.yml`](.github/workflows/rust-osv-scanner.yml)       |                         `actions: read`<br><br> `security-events: write`<br><br> `contents: read`                          | Run OSV (vulnerabilities) scanner                                                                                                                           |                  :x:                   |           :white_check_mark:            |
-| Build and test Rust code | [`rust-build-and-test.yml`](.github/workflows/rust-build-and-test.yml) |                                          `contents: read`<br><br> `checks: write`                                          | Compile a local package and all of its dependencies and execute all unit and integration tests and build examples of a local package. Test report included. |       `debug`<br><br> `release`        |                   :x:                   |
-| Execute Rust benchmarks  | [`rust-benchmarks.yml`](.github/workflows/rust-benchmarks.yml)         |                                                      `contents: read`                                                      | Execute all benchmarks of a local package                                                                                                                   | `quiet`<br><br> `report-filename-base` |           :white_check_mark:            |
-| CodeQL Analysis for Rust | [`rust-codeql-analyze.yml`](.github/workflows/rust-codeql-analyze.yml) |                         `actions: read`<br><br> `security-events: write`<br><br> `contents: read`                          | [Extended Security CodeQL Analysis for Rust](https://codeql.github.com/docs/codeql-overview/supported-languages-and-frameworks/#rust-built-in-support)      |                  :x:                   |           :white_check_mark:            |
+| Name                            | YAML                                                                               | Required<br> [permissions](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#permissions) | Description                                                                                                                                                 |                              Inputs                               | Artifacts <br>(produced during runtime) |
+|---------------------------------|------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------:|-------------------------------------------------------------------------------------------------------------------------------------------------------------|:-----------------------------------------------------------------:|:---------------------------------------:|
+| rust-clippy analyze             | [`rust-clippy.yml`](.github/workflows/rust-clippy.yml)                             |                         `actions: read`<br><br> `security-events: write`<br><br> `contents: read`                          | Checks Rust package to catch common mistakes and improve the code                                                                                           |                                :x:                                |                   :x:                   |
+| OSV-Scanner for Rust            | [`rust-osv-scanner.yml`](.github/workflows/rust-osv-scanner.yml)                   |                         `actions: read`<br><br> `security-events: write`<br><br> `contents: read`                          | Run OSV (vulnerabilities) scanner                                                                                                                           |                                :x:                                |           :white_check_mark:            |
+| Build and test Rust code        | [`rust-build-and-test.yml`](.github/workflows/rust-build-and-test.yml)             |                                          `contents: read`<br><br> `checks: write`                                          | Compile a local package and all of its dependencies and execute all unit and integration tests and build examples of a local package. Test report included. |                     `debug`<br><br> `release`                     |                   :x:                   |
+| Execute Rust benchmarks         | [`rust-benchmarks.yml`](.github/workflows/rust-benchmarks.yml)                     |                                                      `contents: read`                                                      | Execute all benchmarks of a local package                                                                                                                   |              `quiet`<br><br> `report-filename-base`               |           :white_check_mark:            |
+| CodeQL Analysis for Rust        | [`rust-codeql-analyze.yml`](.github/workflows/rust-codeql-analyze.yml)             |                         `actions: read`<br><br> `security-events: write`<br><br> `contents: read`                          | [Extended Security CodeQL Analysis for Rust](https://codeql.github.com/docs/codeql-overview/supported-languages-and-frameworks/#rust-built-in-support)      |                                :x:                                |           :white_check_mark:            |
+| Build UniFFI bindings for Swift | [`rust-build-swift-bindings.yml`](.github/workflows/rust-build-swift-bindings.yml) |                                                      `contents: read`                                                      | Build UniFFI bindings and Swift packages                                                                                                                    | `newVersion`<br><br> `swiftPackageName`<br><br> `xcFrameworkName` |           :white_check_mark:            |
 
 ## Workflows
 
@@ -134,6 +135,10 @@ sequenceDiagram
 
 :x: **COMMING SOON**
 
+### Typical [`rust-build-swift-bindings.yml`](.github/workflows/rust-build-swift-bindings.yml) sequence
+
+:x: **COMMING SOON**
+
 ## (Re)usage examples
 
 Here are just a few indicative usage examples as seen in other code (Rust/Java) repos in this GitHub organization.
@@ -244,7 +249,6 @@ jobs:
       #report-filename-base: benchmarks-report
 ```
 
-
 ### Reusing [`rust-codeql-analyze.yml`](.github/workflows/rust-codeql-analyze.yml)
 
 ```yaml
@@ -277,4 +281,28 @@ permissions:
 jobs:
   rust-codeql-analyze:
     uses: swiyu-admin-ch/github-actions-workflows/.github/workflows/rust-codeql-analyze.yml@main
+```
+
+### Reusing [`rust-build-swift-bindings`](.github/workflows/rust-build-swift-bindings.yml)
+
+```yaml
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch:
+    inputs:
+      newVersion:
+        description: 'New Version'
+        type: string
+        default: '0.0.0'
+        required: true
+
+jobs:
+  rust-build-swift-bindings:
+    uses: swiyu-admin-ch/github-actions-workflows/.github/workflows/rust-build-swift-bindings.yml@main
+    with:
+      newVersion: ${{ github.event.inputs.newVersion }}
+      swiftPackageName: DidResolver
+      xcFrameworkName: didresolver
 ```
