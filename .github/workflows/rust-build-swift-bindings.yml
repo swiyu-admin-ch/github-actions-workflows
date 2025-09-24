@@ -120,6 +120,6 @@ jobs:
       - name: Save Swift package
         uses: actions/upload-artifact@v4
         with:
-          name: swift-bindings
+          name: swift-bindings-${{ inputs.newVersion }}
           path: |
             output

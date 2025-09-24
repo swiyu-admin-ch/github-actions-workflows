@@ -87,9 +87,10 @@ cat <<-EOF > output/Package.swift
 import PackageDescription
 
 let version = "${version}"
+let xcframework_name = "${xcframework_name}"
+let binary_target_url_github_owner = "${binary_target_url_github_owner}"
+let binary_target_url_github_repo = "${binary_target_url_github_repo}"
 let checksum = "${checksum}"
-let binary_target_url_github_owner="${binary_target_url_github_owner}"
-let binary_target_url_github_repo="${binary_target_url_github_repo}"
 
 let package = Package(
     name: "${swift_package_name}",
@@ -108,7 +109,7 @@ let package = Package(
         ),
         .binaryTarget(
             name: "${swift_package_name}RemoteBinaryPackage",
-            url: "https://github.com/\(binary_target_url_github_owner)/\(binary_target_url_github_repo)/releases/download/\(version)/${xcframework_name}-\(version).xcframework.zip",
+            url: "https://github.com/\(binary_target_url_github_owner)/\(binary_target_url_github_repo)/releases/download/\(version)/\(xcframework_name)-\(version).xcframework.zip",
             checksum: "\(checksum)"
         )
     ]
