@@ -23,6 +23,16 @@ on:
         type: string
         default: 'didresolver'
         required: true
+      binaryTargetUrlGitHubOwner:
+        description: 'The GitHub owner of repo hosting the Swift release package available at https://github.com/<binaryTargetUrlGitHubOwner>/<binaryTargetUrlGitHubRepo>/releases/download/<newVersion>/<xcFrameworkName>-<newVersion>.xcframework.zip'
+        type: string
+        default: 'swiyu-admin-ch'
+        required: false
+      binaryTargetUrlGitHubRepo:
+        description: 'The GitHub repo hosting Swift release package available at https://github.com/<binaryTargetUrlGitHubOwner>/<binaryTargetUrlGitHubRepo>/releases/download/<newVersion>/<xcFrameworkName>-<newVersion>.xcframework.zip'
+        type: string
+        default: 'didresolver-swift'
+        required: true
 
 permissions:
   # to fetch code (actions/checkout)
@@ -105,7 +115,7 @@ jobs:
 
       - name: Build UniFFI bindings and Swift packages
         shell: bash
-        run: $PWD/rust-build-swift-bindings.sh ${{ inputs.newVersion }} ${{ inputs.swiftPackageName }} ${{ inputs.xcFrameworkName }}
+        run: $PWD/rust-build-swift-bindings.sh ${{ inputs.newVersion }} ${{ inputs.swiftPackageName }} ${{ inputs.xcFrameworkName }} ${{ inputs.binaryTargetUrlGitHubOwner }} ${{ inputs.binaryTargetUrlGitHubRepo }}
 
       - name: Save Swift package
         uses: actions/upload-artifact@v4

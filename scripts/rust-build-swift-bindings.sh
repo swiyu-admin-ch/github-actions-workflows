@@ -9,12 +9,16 @@ if [ $# -eq 0 ]; then
     echo "   First  argument has to be a (semantic) version, e.g. '1.2.3'"
     echo "   Second argument has to be a Swift package name, e.g. 'DidResolver'"
     echo "   Third  argument has to be a XCFramework name,   e.g. 'didresolver'"
+    echo "   Fourth argument has to be a GitHub owner of the repo hosting the Swift release package, e.g. 'swiyu-admin-ch'"
+    echo "   Fifth  argument has to be a GitHub repo hosting the Swift release package, e.g. 'didresolver-swift'"
     exit 1
 fi
 
 version=$1
 swift_package_name=$2
 xcframework_name=$3
+binary_target_url_github_owner=$4
+binary_target_url_github_repo=$5
 
 echo ">>"; echo ">> Generating UniFFI bindings for Swift package '${swift_package_name}' ver. ${version} ..."; echo ">>"
 cargo run --bin uniffi-bindgen generate \
@@ -84,6 +88,8 @@ import PackageDescription
 
 let version = "${version}"
 let checksum = "${checksum}"
+let binary_target_url_github_owner="${binary_target_url_github_owner}"
+let binary_target_url_github_repo="${binary_target_url_github_repo}"
 
 let package = Package(
     name: "${swift_package_name}",
@@ -102,7 +108,7 @@ let package = Package(
         ),
         .binaryTarget(
             name: "${swift_package_name}RemoteBinaryPackage",
-            url: "https://github.com/swiyu-admin-ch/didresolver-swift/releases/download/\(version)/${xcframework_name}-\(version).xcframework.zip",
+            url: "https://github.com/\(binary_target_url_github_owner)/\(binary_target_url_github_repo)/releases/download/\(version)/${xcframework_name}-\(version).xcframework.zip",
             checksum: "\(checksum)"
         )
     ]
