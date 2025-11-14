@@ -29,7 +29,7 @@ jobs:
       - name: Initialize CodeQL
         # Sets up CodeQL for analysis.
         # For information about input parameters, see https://github.com/github/codeql-action/blob/main/init/action.yml
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@4
         with:
           # Provided by the current versions of the CodeQL query pack codeql/rust-queries and the CodeQL library pack codeql/rust-all
           # See https://codeql.github.com/docs/codeql-overview/supported-languages-and-frameworks/#rust-built-in-support
@@ -68,7 +68,7 @@ jobs:
         # Compilation outside init and analyze steps: Your workflow builds a compiled language (C, C++, C#, Go, or Java),
         # but compilation does not occur between the init and analyze steps in the workflow.
         # CodeQL requires that your build happens in between these two steps in order to observe the activity of the compiler and perform analysis.
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         with:
           # String used by Code Scanning for matching the analyses
           #
