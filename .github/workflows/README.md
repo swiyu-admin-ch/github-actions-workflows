@@ -1,6 +1,6 @@
-# workflows
+# Workflows
 
-This configuration directory containing various [**_reusable_**](https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows) 
+This configuration directory contains various [**_reusable_**](https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows) 
 (i.t. to be called by another workflow) YAML files describing GitHub Actions workflows, as advised [here](https://docs.github.com/en/actions/get-started/understanding-github-actions#workflows):
 
 _A workflow is a configurable automated process that will run one or more jobs.

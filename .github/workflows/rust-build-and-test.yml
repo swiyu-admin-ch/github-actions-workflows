@@ -38,27 +38,15 @@ jobs:
         BUILD_TARGET: [ dev, release ] # refers to a cargo profile
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install the Rust toolchain
-        # https://github.com/marketplace/actions/rust-toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          # https://rust-lang.github.io/rustup/concepts/profiles.html
-          profile: minimal
-          toolchain: stable
-          # https://rust-lang.github.io/rustup/concepts/components.html
-          #components: ...
-          override: true
+        uses: actions/checkout@v5
 
       - name: Cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
             target
-          #key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.toml') }}
 
       - name: Build binaries (${{ matrix.BUILD_TARGET }})
@@ -79,7 +67,7 @@ jobs:
 
       - name: Upload test results (${{ matrix.BUILD_TARGET }})
         if: (!cancelled())
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Test results (${{ matrix.BUILD_TARGET }})
           path: test-results-${{ matrix.BUILD_TARGET }}.xml
@@ -94,7 +82,7 @@ jobs:
 
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: artifacts
 
@@ -104,14 +92,3 @@ jobs:
           files: artifacts/**/test-results-*.xml
           deduplicate_classes_by_file_name: true
           report_individual_runs: true
-
-      #- name: Publish test report
-      #  #https://github.com/marketplace/actions/junit-report-action
-      #  uses: mikepenz/action-junit-report@v3
-      #  if: success() || failure() # always run even if the previous step fails
-      #  with:
-      #    report_paths: artifacts/**/test-results-*.xml
-      #    detailed_summary: true
-      #    include_passed: true
-      #    check_name: Test Report
-      #    #annotate_notice: true

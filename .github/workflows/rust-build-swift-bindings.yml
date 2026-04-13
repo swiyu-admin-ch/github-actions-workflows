@@ -46,29 +46,16 @@ jobs:
     runs-on: macos-14
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: main
-      - name: Install Rust
-        run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-          #echo ">>"; echo ">> Setting default toolchain to:"; echo ">>"
-          #rustup default 1.xy
-          echo ">>"; echo ">> Rust Compiler version:"; echo ">>"
-          rustc --version --verbose
-          echo ">>"; echo ">> Available iOS-related targets:"; echo ">>"
-          rustc --print=target-list | grep apple-ios
-      #- uses: de-vri-es/setup-git-credentials@v2
-      #  with:
-      #    credentials: ${{ secrets.WORFKLOW_TOKEN_LIBRARIES }}
       - name: Cache Rust modules
         id: cache-rust
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         env:
           cache-name: cache-rust-modules
         with:
           path: target
-          #key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/Cargo.lock') }}
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/Cargo.toml') }}
           # An ordered multiline string listing the prefix-matched keys, that are used for restoring stale cache if no cache hit occurred for key. Note `cache-hit` returns false in this case.
           restore-keys: |
@@ -118,7 +105,7 @@ jobs:
         run: $PWD/rust-build-swift-bindings.sh ${{ inputs.newVersion }} ${{ inputs.swiftPackageName }} ${{ inputs.xcFrameworkName }} ${{ inputs.binaryTargetUrlGitHubOwner }} ${{ inputs.binaryTargetUrlGitHubRepo }}
 
       - name: Save Swift package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: swift-bindings-${{ inputs.newVersion }}
           path: |
