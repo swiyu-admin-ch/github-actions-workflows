@@ -1,3 +1,6 @@
+# Exit script as soon as a command returns a non 0 exit code
+set -e
+
 echo ">>"; echo ">> Cleanup"; echo ">>"
 cargo clean
 echo ">>"; echo ">> Build release"; echo ">>"
