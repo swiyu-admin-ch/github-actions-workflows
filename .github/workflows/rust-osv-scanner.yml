@@ -24,19 +24,11 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install Rust toolchain
-        # https://github.com/marketplace/actions/rust-toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          components: clippy
-          override: true
+        uses: actions/checkout@v5
 
       - name: Install required Rust binary (cargo-sbom)
         run: |
+          # Rust available from the get go in ubuntu-latest (https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md#rust-tools)
           cargo install cargo-sbom
           cargo-sbom --version
 
@@ -45,7 +37,7 @@ jobs:
         run: cargo-sbom > sbom.spdx.json
 
       - name: Upload SBOM
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: SBOM-file
           path: sbom.spdx.json
@@ -55,7 +47,7 @@ jobs:
     needs: sbom
     name: OSV (vulnerabilities) scanner
     # see https://google.github.io/osv-scanner/github-action/
-    uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.2.2"
+    uses: "google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@v2.3.5"
     with:
       # Download the artifact uploaded in sbom step
       download-artifact: SBOM-file
