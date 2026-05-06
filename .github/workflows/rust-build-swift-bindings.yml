@@ -98,9 +98,7 @@ jobs:
       - name: Download the build script
         run: |
           pwd
-          # TODO undo this line change
-          # curl -o  $PWD/rust-build-swift-bindings.sh https://raw.githubusercontent.com/swiyu-admin-ch/github-actions-workflows/refs/heads/main/scripts/rust-build-swift-bindings.sh
-          curl -o  $PWD/rust-build-swift-bindings.sh https://raw.githubusercontent.com/swiyu-admin-ch/github-actions-workflows/refs/heads/fix/EIDOMNI-853-improve-github-actions/scripts/rust-build-swift-bindings.sh
+          curl -o  $PWD/rust-build-swift-bindings.sh https://raw.githubusercontent.com/swiyu-admin-ch/github-actions-workflows/refs/heads/main/scripts/rust-build-swift-bindings.sh
           chmod +x $PWD/rust-build-swift-bindings.sh
 
       - name: Build UniFFI bindings and Swift packages
