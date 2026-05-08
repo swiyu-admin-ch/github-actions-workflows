@@ -62,8 +62,18 @@ xcodebuild -create-xcframework \
   -headers ./bindings/swift/files \
   -output "./bindings/swift/${xcframework_name}.xcframework"
 
+# Preventing multiple modulemap build error (inspired by https://github.com/jessegrosjean/module-map-error and https://github.com/jessegrosjean/swift-cargo-problem)
+echo ">>"; echo ">> Preventing 'multiple modulemap build error'..."; echo ">>"
+cd bindings/swift/${xcframework_name}.xcframework
+mkdir ios-arm64/Headers/${xcframework_name} \
+      ios-arm64_x86_64-simulator/Headers/${xcframework_name}
+mv ios-arm64/Headers/*.*                  ios-arm64/Headers/${xcframework_name}/
+mv ios-arm64_x86_64-simulator/Headers/*.* ios-arm64_x86_64-simulator/Headers/${xcframework_name}/
+# CAUTION info.plist must point to the subdirectory as newer version of XCode are otherwise unable to find them.
+sed -i '' "s/<string>Headers<\/string>/<string>Headers\/${xcframework_name}<\/string>/g" ./Info.plist
+
 # ZIP the XCFramework directory to create an release asset
-cd bindings/swift
+cd ..
 zip_file_name=${xcframework_name}-${version}.xcframework.zip
 zip -r ${zip_file_name} ${xcframework_name}.xcframework
 ls -lh ${zip_file_name}
@@ -76,7 +86,7 @@ cd ../..
 echo ">>"; echo ">> Generating the Swift package structure..."; echo ">>"
 mkdir -p output/Sources/${swift_package_name}
 cp -r bindings/swift/${zip_file_name} output/
-cp -r bindings/swift/${xcframework_name}.xcframework/ios-arm64/Headers/*.swift output/Sources/${swift_package_name}
+cp -r bindings/swift/${xcframework_name}.xcframework/ios-arm64/Headers/${xcframework_name}/*.swift output/Sources/${swift_package_name}
 
 cat <<-EOF > output/Package.swift
 // swift-tools-version:5.3
