@@ -38,10 +38,10 @@ jobs:
         BUILD_TARGET: [ dev, release ] # refers to a cargo profile
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
       - name: Cache
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
         with:
           path: |
             ~/.cargo/registry
@@ -68,7 +68,7 @@ jobs:
 
       - name: Upload test results (${{ matrix.BUILD_TARGET }})
         if: (!cancelled())
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: Test results (${{ matrix.BUILD_TARGET }})
           path: test-results-${{ matrix.BUILD_TARGET }}.xml
@@ -83,12 +83,12 @@ jobs:
 
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           path: artifacts
 
       - name: Publish test results
-        uses: EnricoMi/publish-unit-test-result-action@v2
+        uses: EnricoMi/publish-unit-test-result-action@c950f6fb443cb5af20a377fd0dfaa78838901040 # v2
         with:
           files: artifacts/**/test-results-*.xml
           deduplicate_classes_by_file_name: true
