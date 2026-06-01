@@ -47,7 +47,7 @@ jobs:
     needs: sbom
     name: OSV (vulnerabilities) scanner
     # see https://google.github.io/osv-scanner/github-action/
-    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@c51854704019a247608d928f370c98740469d4b5 # v2.3.5
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable.yml@9a498708959aeaef5ef730655706c5a1df1edbc2 # v2.3.8
     with:
       # Download the artifact uploaded in sbom step
       download-artifact: SBOM-file
