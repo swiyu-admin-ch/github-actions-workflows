@@ -22,6 +22,7 @@ swift_package_name=$2
 xcframework_name=$3
 binary_target_url_github_owner=$4
 binary_target_url_github_repo=$5
+module_name=${swift_package_name}FFI
 
 echo ">>"; echo ">> Generating UniFFI bindings for Swift package '${swift_package_name}' ver. ${version} ..."; echo ">>"
 cargo run --bin uniffi-bindgen generate \
@@ -48,10 +49,19 @@ lipo -create -output target/lib${xcframework_name}.a \
   target/x86_64-apple-ios/release/lib${xcframework_name}.a
 ls -lh target/lib${xcframework_name}.a
 
-# CAUTION modulemap must declare all header files in the same module, otherwise won't build with XCode 26.4 and newer
+# CAUTION modulemap must declare all header files in the same module, otherwise won't build with XCode 26.4 and newer.
+# Furthermore, to avoid file collision during build process, files are located in subdirectry, treated as a single module.
 echo ">>"; echo ">> Merging all module maps together..."; echo ">>"
 rm -rf bindings/swift/files/module.modulemap || true
-cat bindings/swift/files/*.modulemap > bindings/swift/files/module.modulemap
+echo "module ${module_name} {" >> bindings/swift/files/module.modulemap # declare module with same name as directory
+grep -oh 'header.*' bindings/swift/files/*.modulemap >> bindings/swift/files/module.modulemap # add all header files declarations
+cat <<-EOF >> bindings/swift/files/module.modulemap
+    export *
+    use "Darwin"
+    use "_Builtin_stdbool"
+    use "_Builtin_stdint"
+}
+EOF
 
 echo ">>"; echo ">> Building the XFC framework '${xcframework_name}'..."; echo ">>"
 rm -rf bindings/swift/${xcframework_name}.xcframework &>/dev/null
@@ -64,16 +74,23 @@ xcodebuild -create-xcframework \
 
 # Preventing multiple modulemap build error (inspired by https://github.com/jessegrosjean/module-map-error and https://github.com/jessegrosjean/swift-cargo-problem)
 echo ">>"; echo ">> Preventing 'multiple modulemap build error'..."; echo ">>"
+mkdir -p output/Sources/${swift_package_name}
 cd bindings/swift/${xcframework_name}.xcframework
-mkdir ios-arm64/Headers/${xcframework_name} \
-      ios-arm64_x86_64-simulator/Headers/${xcframework_name}
-mv ios-arm64/Headers/*.*                  ios-arm64/Headers/${xcframework_name}/
-mv ios-arm64_x86_64-simulator/Headers/*.* ios-arm64_x86_64-simulator/Headers/${xcframework_name}/
-# CAUTION info.plist must point to the subdirectory as newer version of XCode are otherwise unable to find them.
-sed -i '' "s/<string>Headers<\/string>/<string>Headers\/${xcframework_name}<\/string>/g" ./Info.plist
+mkdir ios-arm64/Headers/${module_name} \
+      ios-arm64_x86_64-simulator/Headers/${module_name}
+mv ios-arm64/Headers/*.*                  ios-arm64/Headers/${module_name}/
+mv ios-arm64_x86_64-simulator/Headers/*.* ios-arm64_x86_64-simulator/Headers/${module_name}/
+# CAUTION: to avoid file collision with module.modulemap, the headers and modulemaps files are located in a subdirectory (module_name).
+# Update imports to import the new module (sudirectory) instead of the corresponding module directly.
+sed -i '' "10s/.*/#if canImport\(${module_name}\)/" ios-arm64/Headers/${module_name}/*.swift
+sed -i '' "11s/.*/import ${module_name}/" ios-arm64/Headers/${module_name}/*.swift
+cd ..
+cp -r ${xcframework_name}.xcframework/ios-arm64/Headers/${module_name}/*.swift ../../output/Sources/${swift_package_name}
+echo ">>"; echo ">> cleanup xcframework files"; echo ">>"
+rm ${xcframework_name}.xcframework/ios-arm64/Headers/${module_name}/*.swift
+rm ${xcframework_name}.xcframework/ios-arm64_x86_64-simulator/Headers/${module_name}/*.swift
 
 # ZIP the XCFramework directory to create an release asset
-cd ..
 zip_file_name=${xcframework_name}-${version}.xcframework.zip
 zip -r ${zip_file_name} ${xcframework_name}.xcframework
 ls -lh ${zip_file_name}
@@ -84,9 +101,9 @@ echo ">>"; echo ">> Checksum of the ZIP archive containing the XCFramework: ${ch
 cd ../..
 
 echo ">>"; echo ">> Generating the Swift package structure..."; echo ">>"
-mkdir -p output/Sources/${swift_package_name}
 cp -r bindings/swift/${zip_file_name} output/
-cp -r bindings/swift/${xcframework_name}.xcframework/ios-arm64/Headers/${xcframework_name}/*.swift output/Sources/${swift_package_name}
+
+echo ">>"; echo ">> Update swift files to use the correct import"; echo ">>"
 
 cat <<-EOF > output/Package.swift
 // swift-tools-version:5.3
