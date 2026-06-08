@@ -49,11 +49,12 @@ lipo -create -output target/lib${xcframework_name}.a \
   target/x86_64-apple-ios/release/lib${xcframework_name}.a
 ls -lh target/lib${xcframework_name}.a
 
-# CAUTION modulemap must declare all header files in the same module, otherwise won't build with XCode 26.4 and newer
+# CAUTION modulemap must declare all header files in the same module, otherwise won't build with XCode 26.4 and newer.
+# Furthermore, to avoid file collision during build process, files are located in subdirectry, treated as a single module.
 echo ">>"; echo ">> Merging all module maps together..."; echo ">>"
 rm -rf bindings/swift/files/module.modulemap || true
-echo "module ${module_name} {" >> bindings/swift/files/module.modulemap
-grep -oh 'header.*' bindings/swift/files/*.modulemap >> bindings/swift/files/module.modulemap
+echo "module ${module_name} {" >> bindings/swift/files/module.modulemap # declare module with same name as directory
+grep -oh 'header.*' bindings/swift/files/*.modulemap >> bindings/swift/files/module.modulemap # add all header files declarations
 cat <<-EOF >> bindings/swift/files/module.modulemap
     export *
     use "Darwin"
@@ -80,7 +81,7 @@ mkdir ios-arm64/Headers/${module_name} \
 mv ios-arm64/Headers/*.*                  ios-arm64/Headers/${module_name}/
 mv ios-arm64_x86_64-simulator/Headers/*.* ios-arm64_x86_64-simulator/Headers/${module_name}/
 # CAUTION: to avoid file collision with module.modulemap, the headers and modulemaps files are located in a subdirectory (module_name).
-# The swift files then must import that subdirectory.
+# Update imports to import the new module (sudirectory) instead of the corresponding module directly.
 sed -i '' "10s/.*/#if canImport\(${module_name}\)/" ios-arm64/Headers/${module_name}/*.swift
 sed -i '' "11s/.*/import ${module_name}/" ios-arm64/Headers/${module_name}/*.swift
 cd ..
