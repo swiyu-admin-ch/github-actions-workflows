@@ -40,14 +40,14 @@ echo ">>"; echo ">> Building for Apple iOS Simulator on ARM64..."; echo ">>"
 IPHONEOS_DEPLOYMENT_TARGET=15.0 cargo build --release --target aarch64-apple-ios-sim
 echo ">>"; echo ">> Building for Apple iOS Simulator on 64-bit x86..."; echo ">>"
 IPHONEOS_DEPLOYMENT_TARGET=15.0 cargo build --release --target x86_64-apple-ios
-ls -lh target/**/release/lib${xcframework_name}.a
+ls -lh target/**/release/lib${xcframework_name}.dylib
 
 # CAUTION In case of iOS Simulator, all the simulator-relevant libs must be combined into one single "fat" static library
 echo ">>"; echo ">> Building a single 'fat' static library 'lib${xcframework_name}'..."; echo ">>"
-lipo -create -output target/lib${xcframework_name}.a \
-  target/aarch64-apple-ios-sim/release/lib${xcframework_name}.a \
-  target/x86_64-apple-ios/release/lib${xcframework_name}.a
-ls -lh target/lib${xcframework_name}.a
+lipo -create -output target/lib${xcframework_name}.dylib \
+  target/aarch64-apple-ios-sim/release/lib${xcframework_name}.dylib \
+  target/x86_64-apple-ios/release/lib${xcframework_name}.dylib
+ls -lh target/lib${xcframework_name}.dylib
 
 # CAUTION modulemap must declare all header files in the same module, otherwise won't build with XCode 26.4 and newer.
 # Furthermore, to avoid file collision during build process, files are located in subdirectry, treated as a single module.
@@ -66,9 +66,9 @@ EOF
 echo ">>"; echo ">> Building the XFC framework '${xcframework_name}'..."; echo ">>"
 rm -rf bindings/swift/${xcframework_name}.xcframework &>/dev/null
 xcodebuild -create-xcframework \
-  -library ./target/lib${xcframework_name}.a \
+  -library ./target/lib${xcframework_name}.dylib \
   -headers ./bindings/swift/files \
-  -library ./target/aarch64-apple-ios/release/lib${xcframework_name}.a \
+  -library ./target/aarch64-apple-ios/release/lib${xcframework_name}.dylib \
   -headers ./bindings/swift/files \
   -output "./bindings/swift/${xcframework_name}.xcframework"
 
