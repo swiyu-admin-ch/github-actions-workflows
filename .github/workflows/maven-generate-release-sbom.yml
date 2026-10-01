@@ -39,7 +39,7 @@ jobs:
           SNYK_ORG: ${{ vars.SNYK_ORG }}
         run: |
           snyk sbom --format=cyclonedx1.6+json \
-                    --maven-aggregate-project \
+                    --all-projects \
                     --maven-skip-wrapper \
                     --json-file-output=sbom.cdx.json
 
