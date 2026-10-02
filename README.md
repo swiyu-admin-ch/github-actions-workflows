@@ -14,6 +14,7 @@ The following [workflow_call](https://docs.github.com/en/actions/reference/workf
 | Execute Rust benchmarks         | [`rust-benchmarks.yml`](.github/workflows/rust-benchmarks.yml)                     |                                                      `contents: read`                                                      | Execute all benchmarks of a local package                                                                                                                   |                                                   `quiet`<br><br> `report-filename-base`                                                   |           :white_check_mark:            |
 | CodeQL Analysis for Rust        | [`rust-codeql-analyze.yml`](.github/workflows/rust-codeql-analyze.yml)             |                         `actions: read`<br><br> `security-events: write`<br><br> `contents: read`                          | [Extended Security CodeQL Analysis for Rust](https://codeql.github.com/docs/codeql-overview/supported-languages-and-frameworks/#rust-built-in-support)      |                                                                    :x:                                                                     |           :white_check_mark:            |
 | Build UniFFI bindings for Swift | [`rust-build-swift-bindings.yml`](.github/workflows/rust-build-swift-bindings.yml) |                                                      `contents: read`                                                      | Build UniFFI bindings and Swift packages                                                                                                                    | `newVersion`<br><br> `swiftPackageName`<br><br> `xcFrameworkName`<br><br> `binaryTargetUrlGitHubOwner`<br><br> `binaryTargetUrlGitHubRepo` |           :white_check_mark:            |
+| Generate SBOM                   | [`maven-generate-release-sbom.yml`](.github/workflows/maven-generate-release-sbom.yml) |                                                 `contents: write`                                                      | Create a release and attach SBOM for Maven                                                                                                                  | `java-version` |           :white_check_mark:            |
 
 ## Workflows
 
@@ -138,6 +139,37 @@ sequenceDiagram
 ### Typical [`rust-build-swift-bindings.yml`](.github/workflows/rust-build-swift-bindings.yml) sequence
 
 :x: **COMMING SOON**
+
+### Typical [`maven-generate-release-sbom.yml`](.github/workflows/maven-generate-release-sbom.yml) sequence
+
+```mermaid
+sequenceDiagram
+    autonumber
+
+    actor dev as Developer
+    participant gh    as GitHub
+    participant maven as Maven build@linux
+    participant snyk  as Snyk CLI
+
+    Note over dev: A logged in GitHub user<br> with sufficient access rights
+    Note over maven: Ubuntu Container<br> JDK (Temurin), default: 25<br> with Maven dependency cache
+    Note over snyk: ⚠️ requires SNYK_TOKEN secret<br> optional SNYK_API / SNYK_ORG vars
+
+    dev    ->>+ gh: create and push new tag<br>(git tag <NEW_TAG> && git push --tags)
+    gh     ->>+ maven: trigger reusable workflow<br>(workflow_call)
+    maven  ->>  maven: checkout repository<br>(persist-credentials: false)
+    maven  ->>  maven: set up JDK (Temurin)<br> and Maven cache
+    maven  ->>+ snyk: install Snyk CLI
+    snyk   ->>  snyk: generate SBOM<br>(CycloneDX 1.6 JSON)<br>sbom.cdx.json
+
+    alt success
+        maven ->>  gh: create release for the tag<br>(gh release create --verify-tag)
+        maven -->> gh: attach sbom.cdx.json<br> as release asset
+    else errors occurred
+        maven -->>- gh: Break the workflow execution
+        gh    -->>- dev: notify user<br>per e-mail
+    end
+```
 
 ## (Re)usage examples
 
@@ -306,4 +338,21 @@ jobs:
       swiftPackageName: DidResolver
       xcFrameworkName: didresolver
       binaryTargetUrlGitHubRepo: didresolver-swift
+```
+
+### Reusing [`maven-generate-release-sbom`](.github/workflows/maven-generate-release-sbom.yml)
+
+```yaml
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  release-sbom:
+    uses: "swiyu-admin-ch/github-actions-workflows/.github/workflows/maven-generate-release-sbom.yml@main"
+    permissions:
+      contents: write
+    secrets:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 ```
