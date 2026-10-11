@@ -68,7 +68,7 @@ jobs:
         # Compilation outside init and analyze steps: Your workflow builds a compiled language (C, C++, C#, Go, or Java),
         # but compilation does not occur between the init and analyze steps in the workflow.
         # CodeQL requires that your build happens in between these two steps in order to observe the activity of the compiler and perform analysis.
-        uses: github/codeql-action/analyze@9e0d7b8d25671d64c341c19c0152d693099fb5ba # v4
+        uses: github/codeql-action/analyze@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4
         with:
           # String used by Code Scanning for matching the analyses
           #
